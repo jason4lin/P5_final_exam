@@ -15,24 +15,46 @@ const pages = 6;
 var nowPage = 0;
 //上次切換時間
 var lastTime = 0;
+//轉場用
+var switchPage = 16;
+var lastPage;
 
+function preload() {
+  // Creates a p5.Font object.
+  font = loadFont('./NotoSansTC-Black.ttf');
+}
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
   data = await getSteamInv()
   cloud = new Cloud(tags, height/2)
+  textFont(font);
+  background(27,40,56)
+  textSize(100)
 }
 
 function draw() {
-  background(100)
   switch(nowPage){
+    case -1:
+      if(switchPage < 30){
+        background(27,40,56,256/30*switchPage)
+        switchPage++
+      }else{
+        //頁數改變
+        switchPage = 0;
+        if (lastPage < pages){
+          nowPage = lastPage + 1;
+        } else {
+          nowPage = 0;
+        }
+        background(27,40,56)
+      }
     case 1:
       text(nowPage,width/2,height/2)
       translate(width/2, height/2);
       cloud.drawCloud("count")
     case 2:
       text(nowPage,width/2,height/2)
-
     case 3:
       text(nowPage,width/2,height/2)
 
@@ -55,6 +77,17 @@ function mouseClicked() {
   //1秒只能點一下
   if (nowTime > lastTime+1000){
     lastTime = nowTime;
+    lastPage = nowPage;
+    nowPage = -1;
+  }
+}
+
+//滑鼠點一下換一頁
+function mouseClicked() {
+  let nowTime = Date.now();
+  //1秒只能點一下
+  if (nowTime > lastTime+1000){
+    lastTime = nowTime;
     //頁數改變
     if (nowPage < pages){
       nowPage++;
@@ -66,56 +99,80 @@ function mouseClicked() {
 
 async function getSteamInv() {
   const list = (await steamAPI.getOwnedGames()).response.games;
+  console.log(list.length)
 
+  const promises = list.map(e => getGameDetails(e));
+
+  // 等待所有异步操作完成
+  const newlist = await Promise.all(promises);
   
-  for (let index = 0; index < 5; index++) {
-    const e = list[index];
-    const id = e.appid
+  console.log(newlist)
+  analysisGames(newlist)
+}
 
+
+async function getGameDetails(e) {
+  const id = e.appid;
+  console.log(id);
+
+  try {
     const response = await steamAPI.appDetails(id);
 
     if (response && response[id] && response[id].success) {
       const appStoreInfo = response[id].data;
-      const tag = []
-      appStoreInfo.categories.forEach(e => {
-        tag.push(e.description)
-      });
-      appStoreInfo.genres.forEach(e => {
-        tag.push(e.description)
-      });
 
-      const newE = {...e, 
-        name:appStoreInfo.name, 
-        initPrice:appStoreInfo.price_overview.initial_formatted, 
-        lowestPrice:appStoreInfo.price_overview.final_formatted,
-        tag:tag
+      const tag = [];
+      if (appStoreInfo.categories) {
+        appStoreInfo.categories.forEach(e => {
+          tag.push(e.description);
+        });
       }
-      list[index]=newE
-      console.log(list[index])
-      console.log(list[index].tag)
-    }
-    setTimeout(() => {}, 1000);
-  }
-  console.log(list)
+      if (appStoreInfo.genres) {
+        appStoreInfo.genres.forEach(e => {
+          tag.push(e.description);
+        });
+      }
 
-  analysisGames(list)
+      const initPrice = appStoreInfo.price_overview ? appStoreInfo.price_overview.initial : 0;
+      const lowestPrice = appStoreInfo.price_overview ? appStoreInfo.price_overview.final : 0;
+
+      return {
+        ...e,
+        name: appStoreInfo.name,
+        initPrice: initPrice,
+        lowestPrice: lowestPrice,
+        tag: tag
+      };
+    } else {
+      return e;
+    }
+  } catch (error) {
+    console.error('Error fetching game details:', error);
+    return e;
+  }
 }
 
-  function analysisGames(data){
-  
-      data.forEach(game => {
-          let lowestPrice = parseInt(game.lowestPrice.match(/\d+/));
-          accountValue+=lowestPrice;
-          accountPlayTimes+=game.playtime_forever;
-          game.tag.forEach(tag => {
-              if(tags[tag] === undefined){
-                  tags[tag] = {count: 1, lowestPrice: lowestPrice, playTimes: game.playtime_forever};
-              }else{
-                  tags[tag].count++;
-                  tags[tag].lowestPrice+=lowestPrice;
-                  tags[tag].playTimes+=game.playtime_forever;
-              }
-          })
+
+function analysisGames(list) {
+  accountValue = 0; 
+  accountPlayTimes = 0; 
+
+  list.forEach(game => {
+    if (game && game.tag && Array.isArray(game.tag)) {
+      let lowestPrice = parseInt(game.lowestPrice);
+      accountValue += lowestPrice;
+      accountPlayTimes += game.playtime_forever;
+
+      game.tag.forEach(tag => {
+        if (tags[tag] === undefined) {
+          tags[tag] = { count: 1, lowestPrice: lowestPrice, playTimes: game.playtime_forever };
+        } else {
+          tags[tag].count++;
+          tags[tag].lowestPrice += lowestPrice;
+          tags[tag].playTimes += game.playtime_forever;
+        }
       });
-  }
+    }
+  });
+}
   
