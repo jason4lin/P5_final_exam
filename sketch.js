@@ -11,10 +11,14 @@ var accountPlayTimes;
 
 var img;
 
+var isLoading = true;
+
+let input, button;
+
 //總頁數
 const pages = 6;
 //當前頁面
-var nowPage = 1;
+var nowPage = 0;
 //上次切換時間
 var lastTime = 0;
 //轉場用
@@ -30,60 +34,110 @@ function preload() {
 async function setup() {
   createCanvas(windowWidth, windowHeight);
   background(27,40,56)
-  data = await getSteamInv()
-  cloud = new Cloud(tags, height/2*0.75)
+
+  input = createInput('76561198151206920'); 
+  button = createButton('submit');
+
+  input.position(windowWidth/2-(input.width+button.width)/2, windowHeight/2);
+  input.hide(); 
+
+  button.position(input.x + input.width, input.y);
+  button.mousePressed(updateSteamID);
+  button.hide(); 
+
+  // data = await getSteamInv()
+  // isLoading = false;
+  // cloud = new Cloud(tags, height/2*0.75)
   textFont(font);
 }
 
 function draw() {
-  translate(width/2, height/2);
-  switch(nowPage){
-    case -1:
-      if(switchPage < 30){
-        background(27,40,56,256/60*switchPage)
-        switchPage++
-      }else{
-        //頁數改變
-        switchPage = 0;
-        background(27,40,56)
-        if (lastPage < pages){
-          nowPage = lastPage + 1;
-        } else {
-          nowPage = 1;
+  if(nowPage === 0){
+    background(27,40,56)
+    input.show();
+    button.show();
+  } else if (isLoading) {
+    displayLoadingAnimation();
+    input.hide();
+    button.hide();
+  } else {
+    translate(width/2, height/2);
+    switch(nowPage){
+      case -1:
+        if(switchPage < 30){
+          background(27,40,56,256/60*switchPage)
+          switchPage++
+        }else{
+          //頁數改變
+          switchPage = 0;
+          background(27,40,56)
+          if (lastPage < pages){
+            nowPage = lastPage + 1;
+          } else {
+            nowPage = 1;
+          }
         }
-      }
-      break
-    case 1:
-      background(27,40,56)
-      page1()
-      break
-    case 2:
-      background(27,40,56)
-      page2()
-      break
-    case 3:
-      background(27,40,56)
-      page3()
-      break
-    case 4:
-      background(27,40,56)
-      page4()
-      break
-    case 5:
-      background(27,40,56)
-      page5()
-      break
-    case 6:
-      background(27,40,56)
-      page6()
-      break
-    case 7:
-      background(27,40,56)
-      page7()
-    default:
-      console.log("errorPage")
+        break
+      case 1:
+        background(27,40,56)
+        page1()
+        break
+      case 2:
+        background(27,40,56)
+        page2()
+        break
+      case 3:
+        background(27,40,56)
+        page3()
+        break
+      case 4:
+        background(27,40,56)
+        page4()
+        break
+      case 5:
+        background(27,40,56)
+        page5()
+        break
+      case 6:
+        background(27,40,56)
+        page6()
+        break
+      case 7:
+        background(27,40,56)
+        page7()
+      default:
+        console.log("errorPage")
+    }
+    console.log(nowPage)
   }
-  console.log(nowPage)
+}
+
+async function updateSteamID() {
+  steamAPI.steamID = input.value(); // 更新 Steam ID
+  await loadData(); // 加载数据
+}
+
+async function loadData() {
+  isLoading = true;
+  data = await getSteamInv();
+  isLoading = false;
+  cloud = new Cloud(tags, height/2*0.75)
+}
+
+function displayLoadingAnimation() {
+  push ();
+    translate(width/2, height/2);
+    rotate (frameCount * 0.1);
+    noFill ();
+    strokeWeight (20);
+    stroke ("grey");
+    ellipse (0, 0, 200, 200);
+  
+    noFill ();
+    stroke ("white");
+    strokeWeight (20);
+    arc (0, 0, 200, 200, 0, 90);
+  pop ();
 }
 
 //滑鼠點一下換一頁
@@ -202,7 +256,8 @@ async function getGameDetails(e) {
         ...e,
         name: appStoreInfo.name,
         initPrice: initPrice,
-        lowestPrice: lowestPrice,
+        // lowestPrice: lowestPrice,
+        lowestPrice: initPrice,
         tag: tag
       };
     } else {
@@ -251,4 +306,11 @@ function findBigger(category){
     }
   }
   return [big,bigTag]
+}
+
+function findMoneySpentHour(){
+  for(var key in tags){
+    let msh = tags[key].lowestPrice / tags[key].playTimes
+    tags[key].moneySpentHour = msh
+  }
 }
