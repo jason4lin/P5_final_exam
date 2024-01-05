@@ -16,7 +16,7 @@ var isLoading = true;
 let input, button;
 
 //總頁數
-const pages = 6;
+const pages = 7;
 //當前頁面
 var nowPage = 0;
 //上次切換時間
@@ -105,6 +105,7 @@ function draw() {
       case 7:
         background(27,40,56)
         page7()
+        break;
       default:
         console.log("errorPage")
     }
@@ -115,12 +116,15 @@ function draw() {
 async function updateSteamID() {
   steamAPI.steamID = input.value(); // 更新 Steam ID
   await loadData(); // 加载数据
+  findMoneySpentHour()
 }
 
 async function loadData() {
   isLoading = true;
+  nowPage = -1;
   data = await getSteamInv();
   isLoading = false;
+  nowPage = 1;
   cloud = new Cloud(tags, height/2*0.75)
 }
 
@@ -144,10 +148,12 @@ function displayLoadingAnimation() {
 function mouseClicked() {
   let nowTime = Date.now();
   //1秒只能點一下
-  if (nowTime > lastTime+1000){
-    lastTime = nowTime;
-    lastPage = nowPage;
-    nowPage = -1;
+  if(nowPage != 0){
+    if (nowTime > lastTime+1000){
+      lastTime = nowTime;
+      lastPage = nowPage;
+      nowPage = -1;
+    }
   }
 }
 
@@ -189,7 +195,25 @@ function page6(){
 }
 
 function page7(){
+  let maxMoneySpentHour = findBigger('moneySpentHour')[0];
+  let i = 1;
+  let tagsLenght = Object.keys(tags).length
+  let wSpace = width/tagsLenght;
+  for (var key in tags) {
 
+    let barHeight = map(tags[key].moneySpentHour, 0, maxMoneySpentHour, 0, height - 50)
+    fill(240);
+    rect(i * 60 + 50, height - barHeight, 40, barHeight);
+
+    // 在長條圖上方標示類別名稱
+    textAlign(CENTER, CENTER);
+    text(key, i * 60 + 70, height - 20);
+
+    // 在長條圖上方標示數值
+    text(moneySpentHour.toFixed(2), i * 60 + 70, height - barHeight - 10);
+
+    i++
+  }
 }
 
 function bigNumber(num,size){
@@ -310,7 +334,12 @@ function findBigger(category){
 
 function findMoneySpentHour(){
   for(var key in tags){
-    let msh = tags[key].lowestPrice / tags[key].playTimes
-    tags[key].moneySpentHour = msh
+    let msh 
+    if(tags[key].playTimes == 0){
+      msh = (tags[key].lowestPrice/100) / 0.1
+    }else{
+      msh = (tags[key].lowestPrice/100) / (tags[key].playTimes/60)
+    }
+    tags[key].moneySpentHour = msh.toFixed(2)
   }
 }
