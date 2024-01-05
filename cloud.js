@@ -32,7 +32,7 @@ class Cloud{
         return maxSize
       }
     //創建雲
-    createCloud(category,maxTextSize = 40) {
+    createCloud(category,maxTextSize = 60) {
         //儲存已放置的字
         var words = [];
 
@@ -49,7 +49,7 @@ class Cloud{
                 tryTimes++;
         
                 // 計算單詞的位置和大小
-                var size = (nData[category]/this.maxSize[category]) * maxTextSize + 3;
+                var size = (nData[category]/this.maxSize[category]) * maxTextSize;
                 textSize(size);
                 var wWidth = textWidth(key);
                 var x = random(-this.r, this.r - wWidth);
@@ -74,6 +74,7 @@ class Cloud{
         //fill(240);
         //ellipse(0, 0, this.r*2, this.r*2);
 
+        textAlign(LEFT)
         let cloudData = this.cloudData[category]
         // 繪製文字
         noStroke();
@@ -98,9 +99,11 @@ class Cloud{
         for (var key in others) {
             var oWidth = textWidth(others[key].text);
             // 檢查兩個文字的邊界是否相交，如果相交，表示文字重疊
-            if (x + wWidth > others[key].x && 
-                x < others[key].x + oWidth && 
-                y + others[key].size*0.2 > others[key].y - others[key].size*0.7 && 
+
+
+            if (x + wWidth > others[key].x && //右邊界
+                x < others[key].x + oWidth && //左邊界
+                y + wHeight*0.5  > others[key].y - others[key].size*2 && 
                 y - wHeight < others[key].y) {
                 return true;
             }

@@ -9,10 +9,12 @@ var accountValue;
 //計算帳號總遊玩時數
 var accountPlayTimes;
 
+var img;
+
 //總頁數
 const pages = 6;
 //當前頁面
-var nowPage = 0;
+var nowPage = 1;
 //上次切換時間
 var lastTime = 0;
 //轉場用
@@ -22,53 +24,66 @@ var lastPage;
 function preload() {
   // Creates a p5.Font object.
   font = loadFont('./NotoSansTC-Black.ttf');
+  img = loadImage('./steam.png')
 }
 
 async function setup() {
   createCanvas(windowWidth, windowHeight);
-  data = await getSteamInv()
-  cloud = new Cloud(tags, height/2)
-  textFont(font);
   background(27,40,56)
-  textSize(100)
+  data = await getSteamInv()
+  cloud = new Cloud(tags, height/2*0.75)
+  textFont(font);
 }
 
 function draw() {
+  translate(width/2, height/2);
   switch(nowPage){
     case -1:
       if(switchPage < 30){
-        background(27,40,56,256/30*switchPage)
+        background(27,40,56,256/60*switchPage)
         switchPage++
       }else{
         //頁數改變
         switchPage = 0;
+        background(27,40,56)
         if (lastPage < pages){
           nowPage = lastPage + 1;
         } else {
           nowPage = 0;
         }
-        background(27,40,56)
       }
+      break
     case 1:
-      text(nowPage,width/2,height/2)
-      translate(width/2, height/2);
-      cloud.drawCloud("count")
+      background(27,40,56)
+      page1()
+      break
     case 2:
-      text(nowPage,width/2,height/2)
+      background(27,40,56)
+      page2()
+      break
     case 3:
-      text(nowPage,width/2,height/2)
-
+      background(27,40,56)
+      page3()
+      break
     case 4:
-      text(nowPage,width/2,height/2)
-
+      background(27,40,56)
+      page4()
+      break
     case 5:
-      text(nowPage,width/2,height/2)
-
+      background(27,40,56)
+      page5()
+      break
     case 6:
-      text(nowPage,width/2,height/2)
-
+      background(27,40,56)
+      page6()
+      break
+    case 7:
+      background(27,40,56)
+      page7()
     default:
+      console.log("errorPage")
   }
+  console.log(nowPage)
 }
 
 //滑鼠點一下換一頁
@@ -82,19 +97,63 @@ function mouseClicked() {
   }
 }
 
-//滑鼠點一下換一頁
-function mouseClicked() {
-  let nowTime = Date.now();
-  //1秒只能點一下
-  if (nowTime > lastTime+1000){
-    lastTime = nowTime;
-    //頁數改變
-    if (nowPage < pages){
-      nowPage++;
-    } else {
-      nowPage =0;
-    }
-  }
+function page1(){
+  midBottomText("Steam Library Analyzer",100)
+  let imgH = height*0.6
+  image(img,-imgH/2,-imgH/1.5, imgH,imgH)
+}
+
+function page2(){
+  bigNumber((accountPlayTimes/60).toFixed(2),400)
+  midTopText("總遊玩時數",100)
+}
+
+function page3(){
+  bigNumber(`$${accountValue.toFixed(0)}`,350)
+  midTopText("帳號總價值",100)
+}
+
+function page4(){
+  midBottomText(`你擁有的最多遊戲標籤是${123}`,80)
+  translate(0,-height/2*0.15)
+  cloud.drawCloud("count")
+}
+
+function page5(){
+  midBottomText(`你花最多錢的遊戲標籤是${123}`,80)
+  translate(0,-height/2*0.15)
+  cloud.drawCloud("lowestPrice")
+}
+
+function page6(){
+  midBottomText(`你花最多時間的遊戲標籤是${123}`,80)
+  translate(0,-height/2*0.15)
+  cloud.drawCloud("playTimes")
+}
+
+function page7(){
+  
+}
+
+function bigNumber(num,size){
+  textSize(size)
+  fill(240)
+  textAlign(CENTER)
+  text(num,0,height*0.2)
+}
+
+function midBottomText(textIn,size){
+  textSize(size)
+  fill(240)
+  textAlign(CENTER)
+  text(textIn,0,height*0.4)
+}
+
+function midTopText(textIn,size){
+  textSize(size)
+  fill(240)
+  textAlign(CENTER)
+  text(textIn,0,-height*0.35)
 }
 
 async function getSteamInv() {
