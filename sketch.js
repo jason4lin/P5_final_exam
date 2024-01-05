@@ -104,7 +104,7 @@ function draw() {
         break
       case 7:
         background(27,40,56)
-        //page7()
+        page7()
         break;
       default:
         console.log("errorPage")
@@ -195,25 +195,30 @@ function page6(){
 }
 
 function page7(){
-  let maxMoneySpentHour = findBigger('moneySpentHour')[0];
-  let i = 1;
-  let tagsLenght = Object.keys(tags).length
-  let wSpace = width/tagsLenght;
-  for (var key in tags) {
+  let maxMoneySpentHour = findBigger('moneySpentHour');
+  // let i = 1;
+  // let tagsLenght = Object.keys(tags).length
+  // let wSpace = width/tagsLenght;
+  // for (var key in tags) {
 
-    let barHeight = map(tags[key].moneySpentHour, 0, maxMoneySpentHour, 0, height - 50)
-    fill(240);
-    rect(i * 60 + 50, height - barHeight, 40, barHeight);
+  //   let barHeight = map(tags[key].moneySpentHour, 0, maxMoneySpentHour, 0, height - 50)
+  //   fill(240);
+  //   rect(i * 60 + 50, height - barHeight, 40, barHeight);
 
-    // 在長條圖上方標示類別名稱
-    textAlign(CENTER, CENTER);
-    text(key, i * 60 + 70, height - 20);
+  //   // 在長條圖上方標示類別名稱
+  //   textAlign(CENTER, CENTER);
+  //   text(key, i * 60 + 70, height - 20);
 
-    // 在長條圖上方標示數值
-    text(moneySpentHour.toFixed(2), i * 60 + 70, height - barHeight - 10);
+  //   // 在長條圖上方標示數值
+  //   text(moneySpentHour.toFixed(2), i * 60 + 70, height - barHeight - 10);
 
-    i++
-  }
+  //   i++
+  // }
+  
+  textSize(120)
+  fill(240)
+  textAlign(CENTER)
+  text(`你最浪費錢的遊戲標籤是${maxMoneySpentHour[1]}\n平均每小時花花了${maxMoneySpentHour[0]}(USD)`,0,0)
 }
 
 function bigNumber(num,size){
