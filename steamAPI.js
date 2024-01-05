@@ -1,7 +1,7 @@
 class sendRequest {
   constructor() {
     this.key = "7A1DF9F12E6E73FF0B11DAF38666C1B8";
-    this.steamID = "76561198122456037";
+    this.steamID = "76561198151206920";
     this.retryDelay = 1000;
 
     this.optionsget = {

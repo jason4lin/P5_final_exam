@@ -32,7 +32,7 @@ class Cloud{
         return maxSize
       }
     //創建雲
-    createCloud(category,maxTextSize = 60) {
+    createCloud(category,maxTextSize = 90,minsize = 10) {
         //儲存已放置的字
         var words = [];
 
@@ -49,7 +49,8 @@ class Cloud{
                 tryTimes++;
         
                 // 計算單詞的位置和大小
-                var size = (nData[category]/this.maxSize[category]) * maxTextSize;
+                var size = (nData[category]/this.maxSize[category]) * maxTextSize+minsize;
+
                 textSize(size);
                 var wWidth = textWidth(key);
                 var x = random(-this.r, this.r - wWidth);

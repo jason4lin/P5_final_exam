@@ -49,7 +49,7 @@ function draw() {
         if (lastPage < pages){
           nowPage = lastPage + 1;
         } else {
-          nowPage = 0;
+          nowPage = 1;
         }
       }
       break
@@ -105,34 +105,37 @@ function page1(){
 
 function page2(){
   bigNumber((accountPlayTimes/60).toFixed(2),400)
-  midTopText("總遊玩時數",100)
+  midTopText("總遊玩時數(hr)",100)
 }
 
 function page3(){
-  bigNumber(`$${accountValue.toFixed(0)}`,350)
-  midTopText("帳號總價值",100)
+  bigNumber(`$${accountValue.toFixed(2)}`,350)
+  midTopText("帳號總價值(USD)",100)
 }
 
 function page4(){
-  midBottomText(`你擁有的最多遊戲標籤是${123}`,80)
+  let big = findBigger("count")
+  midBottomText(`你擁有的最多遊戲標籤是${big[1]}，共有${big[0]}款`,60)
   translate(0,-height/2*0.15)
   cloud.drawCloud("count")
 }
 
 function page5(){
-  midBottomText(`你花最多錢的遊戲標籤是${123}`,80)
+  let big = findBigger("lowestPrice")
+  midBottomText(`你花最多錢的遊戲標籤是${big[1]}，共花了$${(big[0]/100)} USD`,60)
   translate(0,-height/2*0.15)
   cloud.drawCloud("lowestPrice")
 }
 
 function page6(){
-  midBottomText(`你花最多時間的遊戲標籤是${123}`,80)
+  let big = findBigger("playTimes")
+  midBottomText(`你花最多時間的遊戲標籤是${big[1]}，共花了${(big[0]/60).toFixed(2)}小時`,60)
   translate(0,-height/2*0.15)
   cloud.drawCloud("playTimes")
 }
 
 function page7(){
-  
+
 }
 
 function bigNumber(num,size){
@@ -181,11 +184,11 @@ async function getGameDetails(e) {
       const appStoreInfo = response[id].data;
 
       const tag = [];
-      if (appStoreInfo.categories) {
-        appStoreInfo.categories.forEach(e => {
-          tag.push(e.description);
-        });
-      }
+      // if (appStoreInfo.categories) {
+      //   appStoreInfo.categories.forEach(e => {
+      //     tag.push(e.description);
+      //   });
+      // }
       if (appStoreInfo.genres) {
         appStoreInfo.genres.forEach(e => {
           tag.push(e.description);
@@ -233,5 +236,19 @@ function analysisGames(list) {
       });
     }
   });
+
+  accountValue = accountValue/100
 }
   
+function findBigger(category){
+  let big = 0;
+  let bigTag;
+  for(var key in tags){
+    let tag = tags[key]
+    if(tag[category] > big){
+      big = tag[category]
+      bigTag = key
+    }
+  }
+  return [big,bigTag]
+}
