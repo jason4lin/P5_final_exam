@@ -35,7 +35,7 @@ async function setup() {
   createCanvas(windowWidth, windowHeight);
   background(27,40,56)
 
-  input = createInput('76561198151206920'); 
+  input = createInput('76561198122456037'); 
   button = createButton('submit');
 
   input.position(windowWidth/2-(input.width+button.width)/2, windowHeight/2);
@@ -104,7 +104,7 @@ function draw() {
         break
       case 7:
         background(27,40,56)
-        page7()
+        //page7()
         break;
       default:
         console.log("errorPage")
