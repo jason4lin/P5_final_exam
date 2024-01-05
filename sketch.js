@@ -164,12 +164,12 @@ function page1(){
 }
 
 function page2(){
-  bigNumber((accountPlayTimes/60).toFixed(2),400)
+  bigNumber((accountPlayTimes/60).toFixed(2),350)
   midTopText("總遊玩時數(hr)",100)
 }
 
 function page3(){
-  bigNumber(`$${accountValue.toFixed(2)}`,350)
+  bigNumber(`$${accountValue.toFixed(2)}`,300)
   midTopText("帳號總價值(USD)",100)
 }
 
